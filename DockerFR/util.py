@@ -4,14 +4,16 @@ from typing import Any, List
 from insightface.app import FaceAnalysis
 from scipy.spatial.distance import cosine
 
-# Initialize the face analysis model once
+# Initialize
 app = FaceAnalysis(providers=['CPUExecutionProvider'])
 app.prepare(ctx_id=0, det_size=(640, 640))
 
 def detect_faces(image: Any) -> List[Any]:
     """
-    Detect faces in an image and return list of cropped faces.
-    """
+        Detect faces within the provided image.
+
+        Return list of cropped faces.
+        """
     if isinstance(image, bytes):
         npimg = np.frombuffer(image, np.uint8)
         image = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
@@ -22,10 +24,19 @@ def detect_faces(image: Any) -> List[Any]:
         crops.append(image[y1:y2, x1:x2])
     return crops
 
+def compute_face_embedding(face_image: Any) -> Any:
+    """
+     Compute a numerical embedding vector for the provided face image.
+    """
+    faces = app.get(face_image)
+    if not faces:
+        return None
+    return faces[0].embedding
+
 
 def detect_face_keypoints(face_image: Any) -> Any:
     """
-    Extract facial keypoints (eyes, nose, mouth corners, etc.)
+    Identify facial keypoints (landmarks) for alignment or analysis.
     """
     faces = app.get(face_image)
     if not faces:
@@ -35,29 +46,21 @@ def detect_face_keypoints(face_image: Any) -> Any:
 
 def warp_face(image: Any, homography_matrix: Any) -> Any:
     """
-    Warp or align the face given the homography matrix.
+    Warp the provided face image using the supplied homography matrix.
     """
     h, w = image.shape[:2]
     aligned = cv2.warpPerspective(image, homography_matrix, (w, h))
     return aligned # function not used.
 
 
-def compute_face_embedding(face_image: Any) -> Any:
-    """
-    Compute numerical embedding for a face.
-    """
-    faces = app.get(face_image)
-    if not faces:
-        return None
-    return faces[0].embedding
-
 
 def antispoof_check(face_image: Any) -> float:
     """
-    Dummy anti-spoof check – always return 1.0 (real face).
-    Replace with a real model if desired.
+    Perform an anti-spoofing check and return a confidence score.
+
+    A higher score should indicate a higher likelihood that the face is real.
     """
-    return 1.0 # function not used.
+    raise NotImplementedError("Student implementation required for face anti-spoofing")
 
 
 def calculate_face_similarity(image_a: Any, image_b: Any) -> float:
