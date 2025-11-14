@@ -1,6 +1,6 @@
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from pydantic import BaseModel
-import torch
+#import torch
 from util import calculate_face_similarity
 
 app = FastAPI(
@@ -20,9 +20,7 @@ class Echo(BaseModel):
 def read_root():
     return {"message": "Hello, FastAPI in Docker!"}
 
-@app.get("/torch-version", tags=["info"])
-def torch_version():
-    return {"torch_version": torch.__version__}
+
 
 @app.get("/health", tags=["Health"])
 def health():
@@ -50,4 +48,9 @@ async def face_similarity(
         similarity = calculate_face_similarity(content_a, content_b)
     except NotImplementedError as exc:
         raise HTTPException(status_code=501, detail=str(exc))
+    except ValueError as exc:
+        # Bad input (e.g., no face detected)
+        raise HTTPException(status_code=400, detail=str(exc))
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Unexpected error: {exc}")
     return {"similarity": similarity}

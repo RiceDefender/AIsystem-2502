@@ -5,6 +5,15 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        build-essential \
+        g++ \
+        python3-dev \
+        libglib2.0-0 \
+        libgl1  && \
+    rm -rf /var/lib/apt/lists/*
+
 RUN python -m pip install --upgrade pip
 
 COPY requirements.txt .
