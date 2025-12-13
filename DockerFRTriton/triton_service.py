@@ -14,7 +14,7 @@ MODEL_NAME = "fr_model"
 MODEL_VERSION = "1"
 MODEL_INPUT_NAME = "input"
 MODEL_OUTPUT_NAME = "embedding"
-MODEL_IMAGE_SIZE = (112, 112)
+MODEL_IMAGE_SIZE = (640, 640)
 
 
 def prepare_model_repository(model_repo: Path) -> None:
@@ -38,18 +38,32 @@ def prepare_model_repository(model_repo: Path) -> None:
         platform: "onnxruntime_onnx"
         max_batch_size: 8
         default_model_filename: "model.onnx"
-        input [
+input [
           {{
-            name: "{MODEL_INPUT_NAME}"
+            name: "input"
             data_type: TYPE_FP32
-            dims: [3, {MODEL_IMAGE_SIZE[0]}, {MODEL_IMAGE_SIZE[1]}]
+            dims: [3, 640, 640]
           }}
         ]
+        
         output [
           {{
-            name: "{MODEL_OUTPUT_NAME}"
+            name: "cat_3" 
             data_type: TYPE_FP32
-            dims: [512]
+            dims: [-1, 4]
+            label_filename: "bboxes"
+          }},
+          {{
+            name: "softmax"
+            data_type: TYPE_FP32
+            dims: [-1, 2]
+            label_filename: "scores"
+          }},
+          {{
+            name: "cat_5"
+            data_type: TYPE_FP32
+            dims: [-1, 10]
+            label_filename: "landmarks"
           }}
         ]
         instance_group [
@@ -139,6 +153,27 @@ def run_inference(client: Any, image_bytes: bytes) -> Any:
     infer_input = httpclient.InferInput(MODEL_INPUT_NAME, batch.shape, "FP32")
     infer_input.set_data_from_numpy(batch)
 
+
+    outputs_to_request = [
+        httpclient.InferRequestedOutput("cat_3"),
+        httpclient.InferRequestedOutput("softmax"),
+        httpclient.InferRequestedOutput("cat_5")
+    ]
+
+    response = client.infer(model_name=MODEL_NAME, inputs=[infer_input], outputs=outputs_to_request)
+
+    bboxes = response.as_numpy("cat_3")
+    scores = response.as_numpy("softmax")
+    landmarks = response.as_numpy("cat_5")
+
+    return {
+        "bboxes": bboxes,
+        "scores": scores,
+        "landmarks": landmarks
+    }
+
+    """
     infer_output = httpclient.InferRequestedOutput(MODEL_OUTPUT_NAME)
     response = client.infer(model_name=MODEL_NAME, inputs=[infer_input], outputs=[infer_output])
     return response.as_numpy(MODEL_OUTPUT_NAME)
+    """
