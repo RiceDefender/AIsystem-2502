@@ -251,7 +251,7 @@ def parse_args() -> argparse.Namespace:
         default=Path("model_repository/fr_model/1/model.onnx"),
         help="Destination for exported ONNX file.",
     )
-    parser.add_argument("--opset", type=int, default=12, help="ONNX opset version.")
+    parser.add_argument("--opset", type=int, default=9, help="ONNX opset version.")
     return parser.parse_args()
 
 

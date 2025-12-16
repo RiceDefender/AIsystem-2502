@@ -3,33 +3,21 @@ name: "fr_model"
         max_batch_size: 8
         default_model_filename: "model.onnx"
 input [
-          {
-            name: "input"
-            data_type: TYPE_FP32
-            dims: [3, 640, 640]
-          }
-        ]
+  {
+    name: "input"
+    data_type: TYPE_FP32
+    dims: [3, 112, 112]
+  }
+]
 
-        output [
-          {
-            name: "cat_3" 
-            data_type: TYPE_FP32
-            dims: [-1, 4]
-            label_filename: "bboxes"
-          },
-          {
-            name: "softmax"
-            data_type: TYPE_FP32
-            dims: [-1, 2]
-            label_filename: "scores"
-          },
-          {
-            name: "cat_5"
-            data_type: TYPE_FP32
-            dims: [-1, 10]
-            label_filename: "landmarks"
-          }
-        ]
-        instance_group [
-          { kind: KIND_CPU }
-        ]
+output [
+  {
+    name: "embedding"
+    data_type: TYPE_FP32
+    dims: [512]
+  }
+]
+
+instance_group [
+  { kind: KIND_CPU }
+]

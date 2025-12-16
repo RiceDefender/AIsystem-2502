@@ -1,4 +1,4 @@
-FROM nvcr.io/nvidia/tritonserver:23.10-py3
+FROM nvcr.io/nvidia/tritonserver:24.07-py3
 
 # Workdir inside container
 WORKDIR /app
@@ -7,7 +7,7 @@ WORKDIR /app
 COPY . /app
 
 # Install Python deps for FastAPI wrapper
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --default-timeout=1000 --no-cache-dir -r requirements.txt
 
 # Default ports for Triton (8000/8001/8002) and FastAPI (3000)
 EXPOSE 8000 8001 8002 3000
