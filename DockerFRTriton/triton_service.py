@@ -37,21 +37,21 @@ def prepare_model_repository(model_repo: Path) -> None:
         f"""
         name: "{MODEL_NAME}"
         platform: "onnxruntime_onnx"
-        max_batch_size: 8
+        max_batch_size: 0
         default_model_filename: "model.onnx"
         input [
           {{
             name: "input"
             data_type: TYPE_FP32
-            dims: [ 3, 112, 112 ]
+            dims: [ 1, 3, 112, 112 ]
           }}
         ]
-        
+
         output [
           {{
             name: "embedding"
             data_type: TYPE_FP32
-            dims: [ 512 ]
+            dims: [ 1, 512 ]
           }}
         ]
         instance_group [
@@ -211,7 +211,7 @@ def run_inference(
     batch = np.expand_dims(np_img, axis=0)
 
     infer_input = httpclient.InferInput(input_name, batch.shape, "FP32")
-    infer_input.set__data_from_numpy(batch)
+    infer_input.set_data_from_numpy(batch)
 
 
     if isinstance(output_names, str):
