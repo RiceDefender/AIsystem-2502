@@ -43,7 +43,7 @@ def prepare_model_repository(model_repo: Path) -> None:
           {{
             name: "input"
             data_type: TYPE_FP32
-            dims: [ 1, 3, 112, 112 ]
+            dims: [ 1, 3, 112, 112 ] 
           }}
         ]
 
@@ -126,9 +126,6 @@ def prepare_face_detector_model_repository(model_repo: Path) -> None:
 
 
 def start_triton_server(model_repo: Path) -> Any:
-    """
-    Launch Triton Inference Server (CPU) pointing at model_repo and return a handle/process.
-    """
     triton_bin = subprocess.run(["which", "tritonserver"], capture_output=True, text=True).stdout.strip()
     if not triton_bin:
         raise RuntimeError("Could not find `tritonserver` binary in PATH. Is Triton installed?")
@@ -146,7 +143,7 @@ def start_triton_server(model_repo: Path) -> Any:
     ]
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
     print(f"[triton] Starting Triton server with command: {' '.join(cmd)}")
-    time.sleep(5)  # Give the server a moment to load the model
+    time.sleep(5) # Give the server a moment to load the model
     return process
 
 
@@ -156,7 +153,6 @@ def stop_triton_server(server_handle: Any) -> None:
     """
     if server_handle is None:
         return
-
     server_handle.terminate()
     try:
         server_handle.wait(timeout=10)
@@ -167,31 +163,22 @@ def stop_triton_server(server_handle: Any) -> None:
 
 
 def create_triton_client(url: str) -> Any:
-    """
-    Initialize a Triton HTTP client for the FR model endpoint.
-    """
     try:
         from tritonclient import http as httpclient
-    except ImportError as exc:  # pragma: no cover - defensive
-        raise RuntimeError("tritonclient[http] is required; install from requirements.txt") from exc
+    except ImportError as exc:
+        raise RuntimeError("tritonclient[http] is required") from exc
 
     client = httpclient.InferenceServerClient(url=url, verbose=False)
-    if not client.is_server_live():
-        raise RuntimeError(f"Triton server at {url} is not live.")
-    if not client.is_model_ready("fr_model"):
-        raise RuntimeError(f"Triton server at {url} is not ready to serve fr_model.")
-    if not client.is_model_ready("face_detector"):
-        raise RuntimeError(f"Triton server at {url} is not ready to serve face_detector.")
     return client
 
 
 def run_inference(
-    client: Any,
-    model_name: str,
-    image_bytes: bytes,
-    input_name: str,
-    output_names: Union[str, List[str]],
-    model_image_size: tuple[int, int],
+        client: Any,
+        model_name: str,
+        image_bytes: bytes,
+        input_name: str = "input",
+        output_names: Union[str, List[str]] = "embedding",
+        model_image_size: tuple[int, int] = (112, 112),
 ) -> Any:
     """
     Preprocess an input image, call Triton, and decode embeddings or scores.
@@ -200,19 +187,19 @@ def run_inference(
         from io import BytesIO
         from PIL import Image
         from tritonclient import http as httpclient
-    except ImportError as exc:  # pragma: no cover - defensive
-        raise RuntimeError("Pillow, numpy, and tritonclient[http] are required to run inference.") from exc
+    except ImportError as exc:
+        raise RuntimeError("triton http is required") from exc
 
     with Image.open(BytesIO(image_bytes)) as img:
         img = img.convert("RGB").resize(model_image_size)
-        np_img = np.asarray(img, dtype=np.float32) / 255.0
+        np_img = np.asarray(img, dtype=np.float32)
+        np_img = (np_img - 127.5) / 128.0
 
-    np_img = np.transpose(np_img, (2, 0, 1))  # HWC -> CHW
+    np_img = np.transpose(np_img, (2, 0, 1))
     batch = np.expand_dims(np_img, axis=0)
 
     infer_input = httpclient.InferInput(input_name, batch.shape, "FP32")
     infer_input.set_data_from_numpy(batch)
-
 
     if isinstance(output_names, str):
         output_names = [output_names]
