@@ -25,16 +25,16 @@ def get_embeddings(client: Any, image_a: bytes, image_b: bytes) -> Tuple[np.ndar
         client=client,
         model_name="fr_model",
         image_bytes=image_a,
-        input_name="input",
-        output_names="embedding",
+        input_name="input.1",
+        output_names="516",
         model_image_size=(112, 112),
     )
     emb_b = run_inference(
         client=client,
         model_name="fr_model",
         image_bytes=image_b,
-        input_name="input",
-        output_names="embedding",
+        input_name="input.1",
+        output_names="516",
         model_image_size=(112, 112),
     )
     return emb_a.squeeze(0), emb_b.squeeze(0)
