@@ -42,7 +42,7 @@ def startup_event() -> None:
     try:
         prepare_model_repository(MODEL_REPO)
         _server_handle = start_triton_server(MODEL_REPO)
-        _triton_client = create_triton_client(f"http://localhost:{TRITON_HTTP_PORT}")
+        _triton_client = create_triton_client(f"localhost:{TRITON_HTTP_PORT}")
     except FileNotFoundError as exc:
         logger.error("Model repository missing required ONNX/model files: %s", exc)
     except Exception as exc:  # pragma: no cover - defensive
