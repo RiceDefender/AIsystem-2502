@@ -174,8 +174,8 @@ def create_triton_client(url: str) -> Any:
 
 def run_inference(
         client: Any,
-        model_name: str,
         image_bytes: bytes,
+        model_name: str = "fr_model",
         input_name: str = "input",
         output_names: Union[str, List[str]] = "embedding",
         model_image_size: tuple[int, int] = (112, 112),
