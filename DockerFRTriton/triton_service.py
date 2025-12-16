@@ -176,7 +176,7 @@ def run_inference(
     image_bytes: bytes,
     model_name: str = "fr_model",
     input_name: str = "input.1",
-    output_names: Union[str, List[str]] = "508",
+    output_names: Union[str, List[str]] = "516",
     model_image_size: tuple[int, int] = (112, 112),
 ) -> Any:
     """
