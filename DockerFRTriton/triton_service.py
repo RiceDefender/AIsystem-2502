@@ -11,8 +11,8 @@ TRITON_GRPC_PORT = 8001
 TRITON_METRICS_PORT = 8002
 MODEL_NAME = "fr_model"
 MODEL_VERSION = "1"
-MODEL_INPUT_NAME = "input"
-MODEL_OUTPUT_NAME = "embedding"
+MODEL_INPUT_NAME = "input.1"
+MODEL_OUTPUT_NAME = "516"
 MODEL_IMAGE_SIZE = (640, 640)
 
 
@@ -41,7 +41,7 @@ def prepare_model_repository(model_repo: Path) -> None:
         default_model_filename: "model.onnx"
         input [
           {{
-            name: "input"
+            name: "input.1"
             data_type: TYPE_FP32
             dims: [ 1, 3, 112, 112 ] 
           }}
@@ -49,7 +49,7 @@ def prepare_model_repository(model_repo: Path) -> None:
 
         output [
           {{
-            name: "embedding"
+            name: "516"
             data_type: TYPE_FP32
             dims: [ 1, 512 ]
           }}
