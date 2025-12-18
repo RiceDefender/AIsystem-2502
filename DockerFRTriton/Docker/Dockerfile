@@ -1,4 +1,4 @@
-FROM nvcr.io/nvidia/tritonserver:25.05-py3-sdk
+FROM nvcr.io/nvidia/tritonserver:24.07-py3
 
 # Workdir inside container
 WORKDIR /app

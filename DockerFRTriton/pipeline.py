@@ -26,7 +26,7 @@ def detect_face(client: Any, image_bytes: bytes) -> Optional[np.ndarray]:
         image_bytes=image_bytes,
         input_name="input",
         output_names=["loc", "conf", "landms"],
-        model_image_size=(640, 640)
+        model_image_size=(256, 256)
     )
 
     bboxes = results["loc"]
