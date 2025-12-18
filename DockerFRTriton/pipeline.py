@@ -89,11 +89,17 @@ def check_spoofing(client: Any, aligned_image_bytes: bytes) -> bool:
         output_names="score",
         model_image_size=(80, 80)
     )
-    scores = result.squeeze()
+    
+    scores = np.array(result).flatten()
+
     if scores.size > 1:
+        # Assuming the second score corresponds to "real"
         real_score = scores[1]
+    elif scores.size == 1:
+        real_score = scores[0]
     else:
-        real_score = scores.item()
+        # No score returned, assume spoof
+        return False
 
     return bool(real_score > SPOOF_THRESHOLD)
 
