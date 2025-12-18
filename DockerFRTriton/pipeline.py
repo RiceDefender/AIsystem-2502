@@ -24,16 +24,18 @@ def detect_face(client: Any, image_bytes: bytes) -> Optional[np.ndarray]:
         client=client,
         model_name=MODEL_DETECTOR,
         image_bytes=image_bytes,
-        input_name="input.1",
-        output_names=["bbox", "kps"],
-        model_image_size=(640, 640)
+        input_name="input",
+        output_names=["loc", "conf", "landms"],
+        model_image_size=(256, 256)
     )
 
-    bboxes = results["bbox"]
-    landmarks = results["kps"]
+    bboxes = results["loc"]
+    landmarks = results["landms"]
+    scores = results["conf"][:, 1]
+
 
     # Filter
-    valid_indices = np.where(bboxes[:, 4] > DETECTION_THRESHOLD)[0]
+    valid_indices = np.where(scores > DETECTION_THRESHOLD)[0]
     if len(valid_indices) == 0:
         return None
     best_idx = -1
@@ -83,13 +85,17 @@ def check_spoofing(client: Any, aligned_image_bytes: bytes) -> bool:
         client=client,
         model_name=MODEL_ANTISPOOF,
         image_bytes=aligned_image_bytes,
-        input_name="input",  # Check your config.pbtxt
+        input_name="input",
         output_names="score",
-        model_image_size=(80, 80)  # Antispoof models often use smaller inputs (80x80 or 128x128)
+        model_image_size=(80, 80)
     )
-    spoof_score = result.squeeze()
-    is_real = spoof_score > SPOOF_THRESHOLD
-    return is_real
+    scores = result.squeeze()
+    if scores.size > 1:
+        real_score = scores[1]
+    else:
+        real_score = scores.item()
+
+    return bool(real_score > SPOOF_THRESHOLD)
 
 
 def _cosine_similarity(vec_a: np.ndarray, vec_b: np.ndarray) -> float:
