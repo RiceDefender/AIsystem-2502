@@ -25,15 +25,14 @@ def detect_face(client: Any, image_bytes: bytes) -> Optional[np.ndarray]:
         model_name=MODEL_DETECTOR,
         image_bytes=image_bytes,
         input_name="input",
-        # FIX: Update names to match the model config (cat_3, softmax, cat_5)
-        output_names=["cat_3", "softmax", "cat_5"],
-        model_image_size=(256, 256)
+        output_names=["loc", "conf", "landms"],
+        model_image_size=(640, 640)
     )
 
-    # FIX: Access the results using the new keys
-    bboxes = results["cat_3"]      # Was "loc"
-    landmarks = results["cat_5"]   # Was "landms"
-    scores = results["softmax"][:, 1] # Was "conf"
+    bboxes = results["loc"]
+    landmarks = results["landms"]
+    scores = results["conf"][:, 1]
+
 
     # Filter
     valid_indices = np.where(scores > DETECTION_THRESHOLD)[0]
@@ -124,8 +123,8 @@ def get_secure_embedding(client: Any, image_bytes: bytes) -> Optional[np.ndarray
         client=client,
         model_name=MODEL_RECOGNITION,
         image_bytes=aligned_bytes,
-        input_name="input.1",
-        output_names="516",
+        input_name="input",
+        output_names="embedding",
         model_image_size=(112, 112),
     )
     return emb.squeeze(0)

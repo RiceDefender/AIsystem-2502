@@ -175,20 +175,10 @@ def run_inference(
     client: Any,
     image_bytes: bytes,
     model_name: str = "fr_model",
-    input_name: str = "input.1",
-    output_names: Union[str, List[str]] = "516",
+    input_name: str = "input",
+    output_names: Union[str, List[str]] = "embedding",
     model_image_size: tuple[int, int] = (112, 112),
 ) -> Any:
-    """
-def run_inference(
-        client: Any,
-        image_bytes: bytes,
-        model_name: str = "fr_model",
-        input_name: str = "input",
-        output_names: Union[str, List[str]] = "embedding",
-        model_image_size: tuple[int, int] = (112, 112),
-) -> Any:
-    """
     """
     Preprocess an input image, call Triton, and decode embeddings or scores.
     """
